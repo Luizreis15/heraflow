@@ -2,104 +2,90 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Hera DG OS — Premium boutique agency design system. All colors HSL. */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Brand */
+    --background: 36 38% 97%;          /* #FAF7F2 branco quente */
+    --foreground: 0 0% 18%;            /* #2F2F2F cinza texto */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 18%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 348 50% 24%;            /* #5A1E2D bordô profundo */
+    --primary-foreground: 36 38% 97%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 30 35% 84%;           /* #E8D8C3 nude/cappuccino */
+    --secondary-foreground: 20 30% 23%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 36 25% 93%;
+    --muted-foreground: 0 0% 35%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 36 47% 58%;              /* #C9A45C dourado */
+    --accent-foreground: 348 50% 24%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --brown: 20 30% 23%;               /* #4A3328 marrom elegante */
+    --brown-foreground: 36 38% 97%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive: 0 65% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --radius: 0.5rem;
+    --border: 35 18% 88%;              /* #E5E1DA */
+    --input: 35 18% 88%;
+    --ring: 348 50% 24%;
 
-    --sidebar-background: 0 0% 98%;
+    --radius: 0.75rem;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-background: 348 50% 24%;
+    --sidebar-foreground: 36 38% 97%;
+    --sidebar-primary: 36 47% 58%;
+    --sidebar-primary-foreground: 348 50% 24%;
+    --sidebar-accent: 348 45% 30%;
+    --sidebar-accent-foreground: 36 38% 97%;
+    --sidebar-border: 348 45% 30%;
+    --sidebar-ring: 36 47% 58%;
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --shadow-soft: 0 4px 16px -4px hsl(348 50% 24% / 0.08);
+    --shadow-card: 0 2px 8px -2px hsl(20 30% 23% / 0.06);
+    --gradient-primary: linear-gradient(135deg, hsl(348 50% 24%), hsl(348 45% 32%));
+    --gradient-gold: linear-gradient(135deg, hsl(36 47% 58%), hsl(36 40% 48%));
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 20 25% 10%;
+    --foreground: 36 38% 95%;
+    --card: 20 25% 13%;
+    --card-foreground: 36 38% 95%;
+    --popover: 20 25% 13%;
+    --popover-foreground: 36 38% 95%;
+    --primary: 36 47% 58%;
+    --primary-foreground: 348 50% 24%;
+    --secondary: 20 20% 20%;
+    --secondary-foreground: 36 38% 95%;
+    --muted: 20 20% 18%;
+    --muted-foreground: 36 15% 65%;
+    --accent: 36 47% 58%;
+    --accent-foreground: 348 50% 24%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 20 20% 22%;
+    --input: 20 20% 22%;
+    --ring: 36 47% 58%;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
+  * { @apply border-border; }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+    font-family: 'Playfair Display', Georgia, serif;
   }
 }
