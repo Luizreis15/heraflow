@@ -35,7 +35,10 @@ export default function Login() {
     const parsed = loginSchema.safeParse({ email: f.get("email"), password: f.get("password") });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword(parsed.data);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: parsed.data.email,
+      password: parsed.data.password,
+    });
     setBusy(false);
     if (error) return toast.error(error.message);
     navigate("/dashboard");
