@@ -23,7 +23,7 @@ export function ProtectedRoute({
     return (
       <div className="flex min-h-screen items-center justify-center p-6 text-center">
         <div>
-          <h2 className="font-serif text-2xl mb-2">Conta inativa</h2>
+          <h2 className="mb-2 text-2xl font-semibold tracking-tight">Conta inativa</h2>
           <p className="text-muted-foreground">Fale com um administrador para reativar seu acesso.</p>
         </div>
       </div>

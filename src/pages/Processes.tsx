@@ -103,7 +103,7 @@ export default function Processes() {
     <div className="space-y-4 max-w-7xl">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="font-serif text-3xl">Processos</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Processos</h1>
           <p className="text-muted-foreground text-sm">Documentação operacional viva.</p>
         </div>
         <Button onClick={() => { setEditing(null); setOpen(true); }}>
@@ -162,7 +162,7 @@ export default function Processes() {
 
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle className="font-serif">{editing ? "Editar processo" : "Novo processo"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="text-lg font-semibold tracking-tight">{editing ? "Editar processo" : "Novo processo"}</DialogTitle></DialogHeader>
           <form onSubmit={onSubmit} className="space-y-3">
             <div><Label htmlFor="name">Nome *</Label><Input id="name" name="name" defaultValue={editing?.name} required /></div>
             <div className="grid grid-cols-2 gap-3">

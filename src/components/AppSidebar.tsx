@@ -9,6 +9,7 @@ import {
   Library,
   Settings,
   LogOut,
+  Hexagon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, roles: null },
@@ -47,52 +49,93 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="px-4 py-5">
-        <div className="flex items-center gap-2">
-          <div className="h-9 w-9 rounded-lg bg-accent flex items-center justify-center text-accent-foreground font-bold font-serif">
-            H
+      <SidebarHeader className="border-b border-sidebar-border/60 px-4 py-5">
+        <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
+              "border border-primary/50 bg-gradient-to-br from-slate-950 to-slate-900",
+              "shadow-[0_0_20px_-4px_hsl(199_89%_48%_/_0.45)]",
+            )}
+          >
+            <Hexagon className="h-5 w-5 text-primary" strokeWidth={1.75} />
           </div>
           {!collapsed && (
-            <div className="flex flex-col leading-tight">
-              <span className="font-serif text-lg font-semibold">Hera DG</span>
-              <span className="text-xs opacity-70">Operating System</span>
+            <div className="flex min-w-0 flex-col leading-tight">
+              <span className="truncate text-base font-bold tracking-tight text-sidebar-foreground">
+                HeraFlow
+              </span>
+              <span className="text-[11px] font-medium uppercase tracking-widest text-primary/90">
+                Command Center
+              </span>
             </div>
           )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="px-1">
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel>Navegação</SidebarGroupLabel>}
+          {!collapsed && (
+            <SidebarGroupLabel className="text-[11px] uppercase tracking-wider text-sidebar-foreground/45">
+              Navegação
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
-            <SidebarMenu>
-              {visible.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={pathname.startsWith(item.url)}>
-                    <NavLink to={item.url} className="flex items-center gap-3">
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+            <SidebarMenu className="gap-0.5">
+              {visible.map((item) => {
+                const active = pathname.startsWith(item.url);
+                return (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={active}
+                      className={cn(
+                        "h-9 transition-all duration-200",
+                        "hover:translate-x-1 hover:bg-sidebar-accent/80",
+                        "data-[active=true]:translate-x-0 data-[active=true]:border data-[active=true]:border-primary/35",
+                        "data-[active=true]:bg-primary/12 data-[active=true]:text-sidebar-accent-foreground",
+                        "data-[active=true]:shadow-[inset_0_0_0_1px_hsl(199_89%_48%_/_0.25),0_0_22px_-8px_hsl(199_89%_48%_/_0.35)]",
+                      )}
+                    >
+                      <NavLink
+                        to={item.url}
+                        className={cn(
+                          "flex w-full items-center gap-3 rounded-md px-2 py-1.5 text-sm font-medium",
+                          active ? "text-sidebar-accent-foreground" : "text-sidebar-foreground/75",
+                        )}
+                      >
+                        <item.icon
+                          className={cn(
+                            "h-4 w-4 shrink-0 transition-colors duration-200",
+                            active ? "text-primary" : "text-sidebar-foreground/55",
+                          )}
+                        />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-3">
+      <SidebarFooter className="border-t border-sidebar-border/50 p-3">
         {!collapsed && profile && (
-          <div className="px-2 pb-2 text-xs">
-            <div className="font-medium truncate">{profile.full_name}</div>
-            <div className="opacity-70 truncate">{profile.email}</div>
+          <div className="mb-2 rounded-lg border border-sidebar-border/60 bg-sidebar-accent/30 px-3 py-2.5 backdrop-blur-sm">
+            <div className="truncate text-xs font-semibold text-sidebar-foreground">{profile.full_name}</div>
+            <div className="truncate text-[11px] text-sidebar-foreground/55">{profile.email}</div>
           </div>
         )}
         <Button
           variant="ghost"
           size="sm"
           onClick={signOut}
-          className="w-full justify-start gap-2 text-sidebar-foreground hover:bg-sidebar-accent"
+          className={cn(
+            "w-full justify-start gap-2 text-sidebar-foreground/80 transition-all duration-200",
+            "hover:bg-destructive/10 hover:text-red-300",
+          )}
         >
           <LogOut className="h-4 w-4" />
           {!collapsed && <span>Sair</span>}

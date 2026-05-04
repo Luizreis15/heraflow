@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -21,7 +21,7 @@ function LeadCard({ lead, onClick }: { lead: any; onClick: () => void }) {
     <div
       ref={setNodeRef} {...attributes} {...listeners} onClick={onClick}
       style={{ opacity: isDragging ? 0.4 : 1 }}
-      className="bg-card border border-border rounded-lg p-3 mb-2 cursor-grab hover:shadow-[var(--shadow-card)]"
+      className="mb-2 cursor-grab rounded-lg border border-border bg-card p-3 transition-all duration-200 hover:border-primary/25 hover:shadow-lg"
     >
       <div className="font-medium text-sm">{lead.clinic_name}</div>
       <div className="text-xs text-muted-foreground mt-1 flex items-center justify-between">
@@ -59,10 +59,15 @@ export default function Commercial() {
   const [profiles, setProfiles] = useState<any[]>([]);
   const [editing, setEditing] = useState<any | null>(null);
   const [open, setOpen] = useState(false);
+  const [leadStatus, setLeadStatus] = useState("mapped");
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   useEffect(() => { document.title = "Comercial — Hera DG OS"; void load(); }, []);
   useEffect(() => { if (search.get("new") === "1") { setEditing(null); setOpen(true); } }, [search]);
+
+  useEffect(() => {
+    if (open) setLeadStatus(editing?.status ?? "mapped");
+  }, [open, editing?.id, editing?.status]);
 
   const load = async () => {
     const [{ data: l }, { data: p }] = await Promise.all([
@@ -79,11 +84,31 @@ export default function Commercial() {
     return g;
   }, [leads]);
 
+  const validateStatusTransition = useCallback((status: string, row: { lost_reason?: string | null; next_action?: string | null; next_follow_up_date?: string | null }) => {
+    if (status === "lost") {
+      const r = String(row.lost_reason ?? "").trim();
+      if (!r) {
+        toast.error("Preencha o motivo de perda no lead antes de mover para Perdido.");
+        return false;
+      }
+    }
+    if (status === "diagnosis_scheduled") {
+      const na = String(row.next_action ?? "").trim();
+      const fd = String(row.next_follow_up_date ?? "").trim();
+      if (!na && !fd) {
+        toast.error("Para Diagnóstico agendado, informe a próxima ação ou a data de follow-up no cadastro do lead.");
+        return false;
+      }
+    }
+    return true;
+  }, []);
+
   const onDragEnd = async (e: DragEndEvent) => {
     if (!e.over) return;
     const id = String(e.active.id); const newStatus = String(e.over.id);
     const l = leads.find((x) => x.id === id);
     if (!l || l.status === newStatus) return;
+    if (!validateStatusTransition(newStatus, l)) return;
     setLeads((p) => p.map((x) => x.id === id ? { ...x, status: newStatus } : x));
     const { error } = await supabase.from("leads").update({ status: newStatus }).eq("id", id);
     if (error) { toast.error(error.message); void load(); }
@@ -92,6 +117,10 @@ export default function Commercial() {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
+    const nextAction = String(f.get("next_action") || "").trim();
+    const followUp = String(f.get("next_follow_up_date") || "").trim();
+    const lostReason = String(f.get("lost_reason") || "").trim();
+
     const payload: any = {
       clinic_name: String(f.get("clinic_name") || "").trim(),
       contact_name: String(f.get("contact_name") || "") || null,
@@ -103,18 +132,33 @@ export default function Commercial() {
       specialty: String(f.get("specialty") || "") || null,
       priority_treatment: String(f.get("priority_treatment") || "") || null,
       source: f.get("source") || null,
-      status: f.get("status") || "mapped",
+      status: leadStatus,
       potential_score: f.get("potential_score") ? Number(f.get("potential_score")) : null,
       main_pain: String(f.get("main_pain") || "") || null,
-      next_action: String(f.get("next_action") || "") || null,
-      next_follow_up_date: f.get("next_follow_up_date") || null,
-      proposal_value: f.get("proposal_value") ? Number(f.get("proposal_value")) : null,
-      lost_reason: String(f.get("lost_reason") || "") || null,
+      next_action: nextAction || null,
+      next_follow_up_date: followUp || null,
+      lost_reason: lostReason || null,
       owner_id: (f.get("owner_id") as string) || null,
     };
     if (payload.source === "none") payload.source = null;
     if (payload.owner_id === "none") payload.owner_id = null;
     if (!payload.clinic_name) return toast.error("Informe a clínica");
+
+    if (payload.status === "lost" && !lostReason) {
+      return toast.error("Para status Perdido, o motivo de perda é obrigatório.");
+    }
+    if (payload.status === "diagnosis_scheduled" && !nextAction && !followUp) {
+      return toast.error("Para Diagnóstico agendado, preencha a próxima ação ou a data de follow-up.");
+    }
+
+    if (leadStatus === "proposal_sent") {
+      const raw = f.get("proposal_value");
+      payload.proposal_value = raw ? Number(raw) : null;
+    } else if (editing) {
+      payload.proposal_value = editing.proposal_value ?? null;
+    } else {
+      payload.proposal_value = null;
+    }
 
     if (editing) {
       const { error } = await supabase.from("leads").update(payload).eq("id", editing.id);
@@ -140,7 +184,7 @@ export default function Commercial() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="font-serif text-3xl">Comercial</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Comercial</h1>
           <p className="text-muted-foreground text-sm">Pipeline de leads.</p>
         </div>
         <Button onClick={() => { setEditing(null); setOpen(true); }}><Plus className="h-4 w-4 mr-1" /> Novo lead</Button>
@@ -156,7 +200,7 @@ export default function Commercial() {
 
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle className="font-serif">{editing ? "Editar lead" : "Novo lead"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="text-lg font-semibold tracking-tight">{editing ? "Editar lead" : "Novo lead"}</DialogTitle></DialogHeader>
           <form onSubmit={onSubmit} className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2"><Label>Clínica *</Label><Input name="clinic_name" defaultValue={editing?.clinic_name} required /></div>
@@ -180,7 +224,7 @@ export default function Commercial() {
               </div>
               <div>
                 <Label>Status</Label>
-                <Select name="status" defaultValue={editing?.status ?? "mapped"}>
+                <Select value={leadStatus} onValueChange={setLeadStatus}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {LEAD_STATUSES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
@@ -199,10 +243,46 @@ export default function Commercial() {
                 </Select>
               </div>
               <div className="col-span-2"><Label>Principal dor</Label><Textarea name="main_pain" defaultValue={editing?.main_pain ?? ""} rows={2} /></div>
-              <div className="col-span-2"><Label>Próxima ação</Label><Input name="next_action" defaultValue={editing?.next_action ?? ""} /></div>
-              <div><Label>Próximo follow-up</Label><Input name="next_follow_up_date" type="date" defaultValue={editing?.next_follow_up_date ?? ""} /></div>
-              <div><Label>Valor da proposta</Label><Input name="proposal_value" type="number" step="0.01" defaultValue={editing?.proposal_value ?? ""} /></div>
-              <div className="col-span-2"><Label>Motivo de perda</Label><Textarea name="lost_reason" defaultValue={editing?.lost_reason ?? ""} rows={2} /></div>
+              <div className="col-span-2">
+                <Label>Próxima ação</Label>
+                <Input name="next_action" defaultValue={editing?.next_action ?? ""} />
+                {leadStatus === "diagnosis_scheduled" && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Obrigatório neste status: preencha a próxima ação <span className="font-medium">ou</span> a data de follow-up abaixo.
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label>Próximo follow-up</Label>
+                <Input name="next_follow_up_date" type="date" defaultValue={editing?.next_follow_up_date ?? ""} />
+              </div>
+              {leadStatus === "proposal_sent" && (
+                <div className="col-span-2 rounded-lg border-2 border-accent/50 bg-accent/10 p-4 space-y-2">
+                  <Label htmlFor="proposal_value" className="text-base font-semibold">
+                    Valor da proposta <span className="font-normal text-muted-foreground">(opcional)</span>
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Registe o valor quando fizer sentido; o pipeline continua válido sem valor.
+                  </p>
+                  <Input
+                    id="proposal_value"
+                    name="proposal_value"
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    placeholder="Ex.: 15000"
+                    defaultValue={editing?.proposal_value ?? ""}
+                    className="bg-background"
+                  />
+                </div>
+              )}
+              <div className="col-span-2">
+                <Label>
+                  Motivo de perda
+                  {leadStatus === "lost" && <span className="text-destructive"> *</span>}
+                </Label>
+                <Textarea name="lost_reason" defaultValue={editing?.lost_reason ?? ""} rows={2} required={leadStatus === "lost"} />
+              </div>
             </div>
             <DialogFooter>
               {editing && isAdmin && <Button type="button" variant="ghost" onClick={remove}><Trash2 className="h-4 w-4 mr-1" /> Excluir</Button>}

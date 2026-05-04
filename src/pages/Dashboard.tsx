@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   KanbanSquare,
   Calendar,
@@ -36,6 +37,10 @@ export default function Dashboard() {
   const [todayList, setTodayList] = useState<any[]>([]);
   const [recentDiary, setRecentDiary] = useState<any[]>([]);
   const [pipelineByStatus, setPipelineByStatus] = useState<Record<string, number>>({});
+  const [hasSprints, setHasSprints] = useState(false);
+  const [hasTasks, setHasTasks] = useState(false);
+  const [hasLeads, setHasLeads] = useState(false);
+  const [hasDiaryEntries, setHasDiaryEntries] = useState(false);
 
   useEffect(() => {
     document.title = "Dashboard — Hera DG OS";
@@ -43,20 +48,36 @@ export default function Dashboard() {
   }, []);
 
   const load = async () => {
-    const today = new Date().toISOString().slice(0, 10);
     const [
       { data: tasks },
       { data: processes },
       { data: leads },
       { data: diary },
       { data: sprint },
+      { count: sprintCount },
+      { count: taskCount },
+      { count: leadCount },
+      { count: diaryCount },
     ] = await Promise.all([
       supabase.from("tasks").select("id, status, due_date, title, priority"),
       supabase.from("processes").select("id"),
       supabase.from("leads").select("id, status"),
-      supabase.from("diary_entries").select("id, title, category, created_at").order("created_at", { ascending: false }).limit(5),
+      supabase
+        .from("diary_entries")
+        .select("id, title, category, created_at, sprints!diary_entries_sprint_id_fkey(id, name)")
+        .order("created_at", { ascending: false })
+        .limit(5),
       supabase.from("sprints").select("*").eq("status", "active").maybeSingle(),
+      supabase.from("sprints").select("id", { count: "exact", head: true }),
+      supabase.from("tasks").select("id", { count: "exact", head: true }),
+      supabase.from("leads").select("id", { count: "exact", head: true }),
+      supabase.from("diary_entries").select("id", { count: "exact", head: true }),
     ]);
+
+    setHasSprints((sprintCount ?? 0) > 0);
+    setHasTasks((taskCount ?? 0) > 0);
+    setHasLeads((leadCount ?? 0) > 0);
+    setHasDiaryEntries((diaryCount ?? 0) > 0);
 
     const allTasks = tasks ?? [];
     const open = allTasks.filter((t) => !["done", "archived", "became_process"].includes(t.status));
@@ -109,7 +130,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 max-w-7xl">
       <div>
-        <h1 className="font-serif text-3xl">Dashboard</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground text-sm">Visão geral da execução da Hera DG.</p>
       </div>
 
@@ -118,14 +139,14 @@ export default function Dashboard() {
           <Card
             key={c.label}
             onClick={() => navigate(c.to)}
-            className={`p-4 cursor-pointer hover:shadow-[var(--shadow-soft)] transition-shadow ${
+            className={`p-4 cursor-pointer transition-all duration-200 hover:border-primary/30 hover:shadow-lg ${
               c.warn && (c.value ?? 0) > 0 ? "border-destructive/40" : ""
             }`}
           >
             <div className="flex items-start justify-between">
               <div>
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">{c.label}</div>
-                <div className="font-serif text-3xl mt-1">{c.value ?? "—"}</div>
+                <div className="mt-1 text-3xl font-semibold tracking-tight tabular-nums">{c.value ?? "—"}</div>
               </div>
               <c.icon className={`h-5 w-5 ${c.warn && (c.value ?? 0) > 0 ? "text-destructive" : c.accent ? "text-accent" : "text-muted-foreground"}`} />
             </div>
@@ -135,7 +156,7 @@ export default function Dashboard() {
 
       <div className="grid lg:grid-cols-3 gap-4">
         <Card className="p-5 lg:col-span-2">
-          <h2 className="font-serif text-xl mb-1">Sprint ativa</h2>
+          <h2 className="text-xl font-semibold tracking-tight mb-1">Sprint ativa</h2>
           {activeSprint ? (
             <>
               <div className="flex items-baseline justify-between">
@@ -158,19 +179,30 @@ export default function Dashboard() {
               </p>
             </>
           ) : (
-            <div className="text-sm text-muted-foreground py-6 text-center">
-              Nenhuma sprint ativa.{" "}
-              <button onClick={() => navigate("/sprints")} className="text-primary underline">
-                Ativar sprint
-              </button>
+            <div className="text-sm text-muted-foreground py-6 text-center space-y-3">
+              <p>
+                {hasSprints
+                  ? "Nenhuma sprint ativa no momento."
+                  : "Ainda não há sprints. Comece pelo primeiro ciclo de execução."}
+              </p>
+              <Button size="sm" variant="outline" onClick={() => navigate("/sprints")}>
+                {hasSprints ? "Ir para Sprints e ativar" : "Criar primeira sprint"}
+              </Button>
             </div>
           )}
         </Card>
 
         <Card className="p-5">
-          <h2 className="font-serif text-xl mb-3">Pipeline comercial</h2>
+          <h2 className="text-xl font-semibold tracking-tight mb-3">Pipeline comercial</h2>
           {Object.keys(pipelineByStatus).length === 0 ? (
-            <p className="text-sm text-muted-foreground">Sem leads cadastrados ainda.</p>
+            <div className="text-sm text-muted-foreground space-y-3">
+              <p>Sem leads no pipeline ainda.</p>
+              {!hasLeads && (
+                <Button size="sm" variant="outline" className="w-full" onClick={() => navigate("/commercial?new=1")}>
+                  Cadastrar primeiro lead
+                </Button>
+              )}
+            </div>
           ) : (
             <ul className="space-y-1.5 text-sm">
               {Object.entries(pipelineByStatus).map(([k, v]) => (
@@ -186,11 +218,18 @@ export default function Dashboard() {
 
       <div className="grid lg:grid-cols-2 gap-4">
         <Card className="p-5">
-          <h2 className="font-serif text-xl mb-3 flex items-center gap-2">
+          <h2 className="text-xl font-semibold tracking-tight mb-3 flex items-center gap-2">
             <ClipboardList className="h-4 w-4" /> Tarefas do dia
           </h2>
           {todayList.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhuma tarefa marcada para hoje.</p>
+            <div className="text-sm text-muted-foreground space-y-3">
+              <p>Nenhuma tarefa marcada para hoje.</p>
+              {!hasTasks && (
+                <Button size="sm" variant="outline" onClick={() => navigate("/tasks?new=1")}>
+                  Criar primeira tarefa
+                </Button>
+              )}
+            </div>
           ) : (
             <ul className="space-y-2">
               {todayList.map((t) => (
@@ -208,30 +247,51 @@ export default function Dashboard() {
         </Card>
 
         <Card className="p-5">
-          <h2 className="font-serif text-xl mb-3 flex items-center gap-2">
+          <h2 className="text-xl font-semibold tracking-tight mb-3 flex items-center gap-2">
             <BookOpen className="h-4 w-4" /> Últimos aprendizados
           </h2>
           {recentDiary.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nada registrado ainda.</p>
+            <div className="text-sm text-muted-foreground space-y-3">
+              <p>Nada nos últimos aprendizados.</p>
+              {!hasDiaryEntries && (
+                <Button size="sm" variant="outline" onClick={() => navigate("/diary?new=1")}>
+                  Registrar primeiro aprendizado
+                </Button>
+              )}
+            </div>
           ) : (
             <ul className="space-y-2">
-              {recentDiary.map((d) => (
+              {recentDiary.map((d) => {
+                const sp = d?.sprints;
+                const sprintName =
+                  sp && typeof sp === "object"
+                    ? Array.isArray(sp)
+                      ? sp[0]?.name
+                      : sp.name
+                    : null;
+                return (
                 <li
                   key={d.id}
                   onClick={() => navigate("/diary")}
-                  className="text-sm flex justify-between items-center cursor-pointer hover:bg-muted px-2 py-1.5 rounded-md"
+                  className="text-sm flex justify-between items-start gap-2 cursor-pointer hover:bg-muted px-2 py-1.5 rounded-md"
                 >
-                  <div className="truncate">
+                  <div className="truncate min-w-0">
                     <div className="truncate">{d.title}</div>
                     <div className="text-xs text-muted-foreground">
                       {format(new Date(d.created_at), "dd MMM", { locale: ptBR })}
+                      {sprintName ? (
+                        <span className="block truncate mt-0.5 text-[11px]">
+                          Sprint: {sprintName}
+                        </span>
+                      ) : null}
                     </div>
                   </div>
                   <Badge variant="outline" className="text-xs ml-2 shrink-0">
                     {labelOf(DIARY_CATEGORIES, d.category)}
                   </Badge>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           )}
         </Card>

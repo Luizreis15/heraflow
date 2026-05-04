@@ -2,90 +2,199 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Hera DG OS — Premium boutique agency design system. All colors HSL. */
+/* HeraFlow — dark premium command surface (HSL tokens for shadcn) */
 
 @layer base {
   :root {
-    /* Brand */
-    --background: 36 38% 97%;          /* #FAF7F2 branco quente */
-    --foreground: 0 0% 18%;            /* #2F2F2F cinza texto */
+    --background: 222 47% 5%;
+    --foreground: 210 40% 94%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 18%;
+    --card: 218 44% 9%;
+    --card-foreground: 210 35% 97%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 18%;
+    --popover: 218 44% 9%;
+    --popover-foreground: 210 35% 97%;
 
-    --primary: 348 50% 24%;            /* #5A1E2D bordô profundo */
-    --primary-foreground: 36 38% 97%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 204 73% 6%;
 
-    --secondary: 30 35% 84%;           /* #E8D8C3 nude/cappuccino */
-    --secondary-foreground: 20 30% 23%;
+    --secondary: 222 47% 11%;
+    --secondary-foreground: 213 32% 90%;
 
-    --muted: 36 25% 93%;
-    --muted-foreground: 0 0% 35%;
+    --muted: 222 40% 12%;
+    --muted-foreground: 213 12% 60%;
 
-    --accent: 36 47% 58%;              /* #C9A45C dourado */
-    --accent-foreground: 348 50% 24%;
+    --accent: 188 94% 51%;
+    --accent-foreground: 204 73% 6%;
 
-    --brown: 20 30% 23%;               /* #4A3328 marrom elegante */
-    --brown-foreground: 36 38% 97%;
+    --brown: 213 18% 72%;
+    --brown-foreground: 210 35% 97%;
 
-    --destructive: 0 65% 45%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 35 18% 88%;              /* #E5E1DA */
-    --input: 35 18% 88%;
-    --ring: 348 50% 24%;
+    --border: 215 18% 22%;
+    --input: 215 18% 26%;
+    --ring: 199 89% 48%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
-    --sidebar-background: 348 50% 24%;
-    --sidebar-foreground: 36 38% 97%;
-    --sidebar-primary: 36 47% 58%;
-    --sidebar-primary-foreground: 348 50% 24%;
-    --sidebar-accent: 348 45% 30%;
-    --sidebar-accent-foreground: 36 38% 97%;
-    --sidebar-border: 348 45% 30%;
-    --sidebar-ring: 36 47% 58%;
+    --sidebar-background: 230 55% 5%;
+    --sidebar-foreground: 213 32% 90%;
+    --sidebar-primary: 199 89% 48%;
+    --sidebar-primary-foreground: 204 73% 6%;
+    --sidebar-accent: 199 70% 16%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 199 55% 28%;
+    --sidebar-ring: 199 89% 48%;
 
-    --shadow-soft: 0 4px 16px -4px hsl(348 50% 24% / 0.08);
-    --shadow-card: 0 2px 8px -2px hsl(20 30% 23% / 0.06);
-    --gradient-primary: linear-gradient(135deg, hsl(348 50% 24%), hsl(348 45% 32%));
-    --gradient-gold: linear-gradient(135deg, hsl(36 47% 58%), hsl(36 40% 48%));
-  }
-
-  .dark {
-    --background: 20 25% 10%;
-    --foreground: 36 38% 95%;
-    --card: 20 25% 13%;
-    --card-foreground: 36 38% 95%;
-    --popover: 20 25% 13%;
-    --popover-foreground: 36 38% 95%;
-    --primary: 36 47% 58%;
-    --primary-foreground: 348 50% 24%;
-    --secondary: 20 20% 20%;
-    --secondary-foreground: 36 38% 95%;
-    --muted: 20 20% 18%;
-    --muted-foreground: 36 15% 65%;
-    --accent: 36 47% 58%;
-    --accent-foreground: 348 50% 24%;
-    --destructive: 0 65% 50%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 20 20% 22%;
-    --input: 20 20% 22%;
-    --ring: 36 47% 58%;
+    --shadow-soft: 0 8px 32px -12px rgba(0, 0, 0, 0.55);
+    --shadow-card: 0 2px 20px -6px rgba(56, 189, 248, 0.12);
+    --shadow-glow: 0 0 28px -6px rgba(56, 189, 248, 0.35);
   }
 }
 
 @layer base {
-  * { @apply border-border; }
-  body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  * {
+    @apply border-border;
   }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
-    font-family: 'Playfair Display', Georgia, serif;
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply text-foreground antialiased;
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(ellipse 90% 55% at 0% -15%, hsl(199 89% 48% / 0.14), transparent 55%),
+      radial-gradient(ellipse 70% 45% at 100% -5%, hsl(250 65% 48% / 0.1), transparent 48%),
+      radial-gradient(ellipse 120% 80% at 50% 100%, hsl(222 45% 8%), hsl(222 47% 5%));
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold tracking-tight text-foreground;
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  }
+
+  ::selection {
+    background-color: hsl(199 89% 48% / 0.35);
+    color: hsl(210 40% 98%);
+  }
+
+  * {
+    scrollbar-color: hsl(215 18% 28%) hsl(222 47% 7%);
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: hsl(222 47% 7%);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, hsl(215 18% 32%), hsl(199 40% 28%));
+    border-radius: 999px;
+    border: 2px solid hsl(222 47% 7%);
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: hsl(199 60% 40%);
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply border-b border-border/80 bg-card/55 backdrop-blur-xl backdrop-saturate-150;
+    box-shadow: 0 1px 0 0 hsl(199 89% 48% / 0.06);
+  }
+
+  .premium-card {
+    @apply rounded-xl border border-border/90 bg-card text-card-foreground shadow-md transition-all duration-200;
+    box-shadow: var(--shadow-card), 0 0 0 1px hsl(199 89% 48% / 0.04);
+  }
+
+  .premium-card:hover {
+    @apply border-primary/35 -translate-y-0.5;
+    box-shadow: var(--shadow-soft), 0 0 0 1px hsl(199 89% 48% / 0.12);
+  }
+
+  .glow-border {
+    box-shadow: 0 0 0 1px hsl(199 89% 48% / 0.25), var(--shadow-glow);
+  }
+
+  .nav-glow {
+    box-shadow: inset 0 0 0 1px hsl(199 89% 48% / 0.28), 0 0 24px -8px hsl(199 89% 48% / 0.35);
+  }
+
+  .subtle-grid-bg {
+    background-image:
+      linear-gradient(hsl(215 18% 22% / 0.35) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(215 18% 22% / 0.35) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 10%, transparent 75%);
+  }
+
+  [data-sidebar="sidebar"] {
+    background-image: linear-gradient(185deg, hsl(232 58% 7%) 0%, hsl(222 48% 6.5%) 42%, hsl(220 45% 5%) 100%) !important;
+    background-color: hsl(var(--sidebar-background)) !important;
+    border-right: 1px solid hsl(199 89% 48% / 0.22) !important;
+    box-shadow: 8px 0 40px -18px rgba(0, 0, 0, 0.65);
+  }
+
+  /* Login — glass + hero (scoped; não altera tema global fora da página) */
+  .login-hero-grid {
+    background-image:
+      linear-gradient(hsl(215 20% 42% / 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(215 20% 42% / 0.07) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 95% 75% at 35% 38%, black 0%, transparent 68%);
+  }
+
+  .login-glass-card {
+    position: relative;
+    isolation: isolate;
+    background: rgba(13, 20, 32, 0.72);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+      0 0 0 1px rgba(56, 189, 248, 0.05),
+      0 28px 56px -16px rgba(0, 0, 0, 0.58),
+      0 0 100px -30px rgba(56, 189, 248, 0.14);
+    border-radius: 1.125rem;
+  }
+
+  .login-glass-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: -1;
+    background: linear-gradient(
+      165deg,
+      rgba(56, 189, 248, 0.07) 0%,
+      transparent 42%,
+      transparent 58%,
+      rgba(99, 102, 241, 0.05) 100%
+    );
+  }
+
+  .login-form-panel {
+    background-image:
+      radial-gradient(ellipse 80% 55% at 50% -10%, hsl(199 89% 48% / 0.1), transparent 55%),
+      radial-gradient(ellipse 60% 45% at 100% 60%, hsl(250 60% 45% / 0.06), transparent 50%);
   }
 }

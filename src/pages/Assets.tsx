@@ -65,7 +65,7 @@ export default function Assets() {
     <div className="space-y-4 max-w-7xl">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="font-serif text-3xl">Biblioteca</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Biblioteca</h1>
           <p className="text-muted-foreground text-sm">Materiais e links reutilizáveis.</p>
         </div>
         <Button onClick={() => { setEditing(null); setOpen(true); }}><Plus className="h-4 w-4 mr-1" /> Novo ativo</Button>
@@ -86,7 +86,7 @@ export default function Assets() {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((a) => (
-            <Card key={a.id} className="p-4 hover:shadow-[var(--shadow-soft)] transition-shadow">
+            <Card key={a.id} className="p-4 transition-all duration-200 hover:border-primary/25 hover:shadow-lg">
               <div className="flex justify-between items-start gap-2 mb-2">
                 <h3 className="font-medium leading-snug">{a.name}</h3>
                 <Badge variant="secondary">{labelOf(ASSET_STATUSES, a.status)}</Badge>
@@ -108,7 +108,7 @@ export default function Assets() {
 
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
         <DialogContent>
-          <DialogHeader><DialogTitle className="font-serif">{editing ? "Editar ativo" : "Novo ativo"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="text-lg font-semibold tracking-tight">{editing ? "Editar ativo" : "Novo ativo"}</DialogTitle></DialogHeader>
           <form onSubmit={onSubmit} className="space-y-3">
             <div><Label>Nome *</Label><Input name="name" defaultValue={editing?.name} required /></div>
             <div className="grid grid-cols-2 gap-3">

@@ -16,7 +16,10 @@ export function GlobalNewButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="sm" className="gap-1.5">
+        <Button
+          size="sm"
+          className="gap-1.5 rounded-lg border border-primary/45 bg-gradient-to-r from-primary to-sky-400 px-4 font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-200 hover:scale-[1.02] hover:border-primary/60 hover:shadow-primary/40 active:scale-[0.98]"
+        >
           <Plus className="h-4 w-4" />
           Novo
         </Button>

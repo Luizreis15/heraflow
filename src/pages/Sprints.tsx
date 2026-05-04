@@ -102,7 +102,7 @@ export default function Sprints() {
     <div className="space-y-6 max-w-7xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-3xl">Sprints</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Sprints</h1>
           <p className="text-muted-foreground text-sm">Ciclos de execução da Hera DG.</p>
         </div>
         {canManage && (
@@ -125,9 +125,9 @@ export default function Sprints() {
             const done = s.tasks?.filter((t: any) => t.status === "done" || t.status === "became_process").length ?? 0;
             const progress = total ? Math.round((done / total) * 100) : 0;
             return (
-              <Card key={s.id} className="p-5 space-y-3 hover:shadow-[var(--shadow-soft)] transition-shadow">
+              <Card key={s.id} className="space-y-3 p-5 transition-all duration-200 hover:border-primary/25 hover:shadow-lg">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-serif text-lg leading-snug">{s.name}</h3>
+                  <h3 className="text-lg font-semibold leading-snug tracking-tight">{s.name}</h3>
                   <Badge variant={s.status === "active" ? "default" : "secondary"}>
                     {labelOf(SPRINT_STATUSES, s.status)}
                   </Badge>
@@ -185,7 +185,7 @@ export default function Sprints() {
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-serif">{editing ? "Editar sprint" : "Nova sprint"}</DialogTitle>
+            <DialogTitle className="text-lg font-semibold tracking-tight">{editing ? "Editar sprint" : "Nova sprint"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div>

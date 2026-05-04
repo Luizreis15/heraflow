@@ -58,7 +58,7 @@ export default function Settings() {
   return (
     <div className="space-y-4 max-w-5xl">
       <div>
-        <h1 className="font-serif text-3xl">Configurações</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Configurações</h1>
         <p className="text-muted-foreground text-sm">Gestão de usuários e permissões.</p>
       </div>
 
