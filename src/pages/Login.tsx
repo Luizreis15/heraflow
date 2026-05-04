@@ -10,6 +10,8 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { formatAuthLoginError } from "@/lib/auth-errors";
+import { getSupabaseHostFromEnv } from "@/lib/site-url";
 
 const loginSchema = z.object({
   email: z.string().trim().email("E-mail inválido").max(255),
@@ -36,6 +38,8 @@ export default function Login() {
 
   if (!loading && user) return <Navigate to="/dashboard" replace />;
 
+  const supabaseHostHint = getSupabaseHostFromEnv();
+
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
@@ -47,7 +51,7 @@ export default function Login() {
       password: parsed.data.password,
     });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(formatAuthLoginError(error));
     navigate("/dashboard");
   };
 
@@ -104,6 +108,17 @@ export default function Login() {
           >
             <Link to="/forgot-password">Esqueci minha senha</Link>
           </Button>
+          {supabaseHostHint ? (
+            <p className="text-center text-[11px] leading-relaxed text-slate-600">
+              Ligação ao Supabase: <span className="font-mono text-slate-500">{supabaseHostHint}</span>
+              <br />
+              <span className="text-slate-600">
+                Se criou o utilizador noutro projecto ou a Vercel tiver outro{" "}
+                <code className="rounded bg-black/30 px-1">VITE_SUPABASE_URL</code>, o login falha mesmo com a senha
+                certa.
+              </span>
+            </p>
+          ) : null}
         </form>
       </Card>
     </AuthShell>
