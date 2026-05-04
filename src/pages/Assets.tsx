@@ -13,6 +13,9 @@ import { Plus, ExternalLink, Trash2, Library, Link2, Tag, Layers, FileStack } fr
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+
+type AssetRow = Tables<"assets">;
 
 /** URL segura para abrir em novo separador (evita relativos / javascript:) */
 function safeExternalHref(raw: string | null | undefined): string | null {
@@ -64,9 +67,9 @@ const STATUS_CHIP: Record<string, string> = {
 
 export default function Assets() {
   const { user, isAdmin } = useAuth();
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<AssetRow[]>([]);
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<any | null>(null);
+  const [editing, setEditing] = useState<AssetRow | null>(null);
   const [filterCat, setFilterCat] = useState("all");
   const [formCategory, setFormCategory] = useState("none");
   const [formStatus, setFormStatus] = useState("draft");
@@ -99,7 +102,7 @@ export default function Assets() {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    const payload: any = {
+    const payload: TablesUpdate<"assets"> = {
       name: String(f.get("name") || "").trim(),
       category: formCategory === "none" ? null : formCategory,
       description: String(f.get("description") || "") || null,
@@ -113,8 +116,12 @@ export default function Assets() {
       const { error } = await supabase.from("assets").update(payload).eq("id", editing.id);
       if (error) return toast.error(error.message);
     } else {
-      payload.created_by = user?.id;
-      const { error } = await supabase.from("assets").insert(payload);
+      const insertPayload: TablesInsert<"assets"> = {
+        ...payload,
+        name: payload.name,
+        created_by: user?.id ?? null,
+      };
+      const { error } = await supabase.from("assets").insert(insertPayload);
       if (error) return toast.error(error.message);
     }
     toast.success("Salvo");

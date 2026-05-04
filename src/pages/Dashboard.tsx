@@ -21,6 +21,21 @@ import { format, isToday, isBefore, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { labelOf, DIARY_CATEGORIES, LEAD_STATUSES, PRIORITIES } from "@/lib/enums";
 import { cn } from "@/lib/utils";
+import type { Tables } from "@/integrations/supabase/types";
+
+type DashboardTaskListRow = Pick<Tables<"tasks">, "id" | "status" | "due_date" | "title" | "priority" | "assignee_id"> & {
+  profiles?: { full_name: string } | { full_name: string }[] | null;
+};
+
+type ActiveSprintState = Tables<"sprints"> & {
+  computed_progress?: number;
+  total_tasks?: number;
+  done_tasks?: number;
+};
+
+type DiaryDashboardRow = Pick<Tables<"diary_entries">, "id" | "title" | "category" | "created_at"> & {
+  sprints?: Pick<Tables<"sprints">, "id" | "name"> | Pick<Tables<"sprints">, "id" | "name">[] | null;
+};
 
 interface Stats {
   openTasks: number;
@@ -49,9 +64,9 @@ function isTaskRowLate(t: { due_date?: string | null; status?: string }) {
 export default function Dashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats | null>(null);
-  const [activeSprint, setActiveSprint] = useState<any>(null);
-  const [todayList, setTodayList] = useState<any[]>([]);
-  const [recentDiary, setRecentDiary] = useState<any[]>([]);
+  const [activeSprint, setActiveSprint] = useState<ActiveSprintState | null>(null);
+  const [todayList, setTodayList] = useState<DashboardTaskListRow[]>([]);
+  const [recentDiary, setRecentDiary] = useState<DiaryDashboardRow[]>([]);
   const [pipelineByStatus, setPipelineByStatus] = useState<Record<string, number>>({});
   const [hasSprints, setHasSprints] = useState(false);
   const [hasTasks, setHasTasks] = useState(false);
@@ -114,7 +129,7 @@ export default function Dashboard() {
     setHasLeads((leadCount ?? 0) > 0);
     setHasDiaryEntries((diaryCount ?? 0) > 0);
 
-    const allTasks = tasks ?? [];
+    const allTasks = (tasks ?? []) as DashboardTaskListRow[];
     const open = allTasks.filter((t) => !["done", "archived", "became_process"].includes(t.status));
     const todayTasks = open.filter((t) => t.status === "today" || (t.due_date && isToday(new Date(t.due_date))));
     const lateTasks = open.filter((t) => t.due_date && isBefore(new Date(t.due_date), startOfDay(new Date())));
@@ -134,9 +149,9 @@ export default function Dashboard() {
       proposalsSent: pipeline["proposal_sent"] ?? 0,
       diaryEntries: diary?.length ?? 0,
     });
-    setActiveSprint(sprint);
+    setActiveSprint(sprint as ActiveSprintState | null);
     setTodayList(todayTasks.slice(0, 8));
-    setRecentDiary(diary ?? []);
+    setRecentDiary((diary ?? []) as DiaryDashboardRow[]);
     setPipelineByStatus(pipeline);
 
     if (sprint) {

@@ -28,6 +28,13 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+
+type TaskEmbed = Pick<Tables<"tasks">, "id" | "title">;
+type ProcessListRow = Tables<"processes"> & {
+  tasks?: TaskEmbed | TaskEmbed[] | null;
+};
+type ProfileOption = Pick<Tables<"profiles">, "id" | "full_name">;
 
 const PROCESS_SELECT = `
   *,
@@ -66,9 +73,9 @@ const STATUS_PLAYBOOK: Record<
   },
 };
 
-function linkSourceTask(p: any) {
+function linkSourceTask(p: ProcessListRow): TaskEmbed | null {
   const row = p?.tasks;
-  return row && typeof row === "object" && !Array.isArray(row) ? row : Array.isArray(row) ? row[0] : null;
+  return row && typeof row === "object" && !Array.isArray(row) ? row : Array.isArray(row) ? row[0] ?? null : null;
 }
 
 function stepsPreview(steps: string | null | undefined, maxLines = 3) {
@@ -80,10 +87,10 @@ function stepsPreview(steps: string | null | undefined, maxLines = 3) {
 export default function Processes() {
   const { user, isAdmin } = useAuth();
   const [search] = useSearchParams();
-  const [items, setItems] = useState<any[]>([]);
-  const [profiles, setProfiles] = useState<any[]>([]);
+  const [items, setItems] = useState<ProcessListRow[]>([]);
+  const [profiles, setProfiles] = useState<ProfileOption[]>([]);
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<any | null>(null);
+  const [editing, setEditing] = useState<ProcessListRow | null>(null);
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterSector, setFilterSector] = useState("all");
   const [q, setQ] = useState("");
@@ -119,7 +126,7 @@ export default function Processes() {
       supabase.from("processes").select(PROCESS_SELECT).order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, full_name").eq("is_active", true),
     ]);
-    setItems(p ?? []);
+    setItems((p ?? []) as ProcessListRow[]);
     setProfiles(pr ?? []);
   };
 
@@ -136,7 +143,7 @@ export default function Processes() {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
     if (formStatus === "official" && !isAdmin) return toast.error("Apenas Admin pode marcar como Oficial");
-    const payload: any = {
+    const payload: TablesUpdate<"processes"> = {
       name: String(f.get("name") || "").trim(),
       sector: formSector === "none" ? null : formSector,
       objective: String(f.get("objective") || "") || null,
@@ -157,8 +164,12 @@ export default function Processes() {
       if (error) return toast.error(error.message);
       toast.success("Processo atualizado");
     } else {
-      payload.created_by = user?.id;
-      const { error } = await supabase.from("processes").insert(payload);
+      const insertPayload: TablesInsert<"processes"> = {
+        ...payload,
+        name: payload.name ?? "",
+        created_by: user?.id ?? null,
+      };
+      const { error } = await supabase.from("processes").insert(insertPayload);
       if (error) return toast.error(error.message);
       toast.success("Processo criado");
     }

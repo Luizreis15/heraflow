@@ -28,6 +28,12 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+
+type SprintTaskEmbed = Pick<Tables<"tasks">, "id" | "status">;
+type SprintListRow = Tables<"sprints"> & {
+  tasks?: SprintTaskEmbed[] | null;
+};
 
 function sprintStatusBadgeClass(status: string) {
   switch (status) {
@@ -49,9 +55,9 @@ function sprintStatusBadgeClass(status: string) {
 export default function Sprints() {
   const navigate = useNavigate();
   const { user, isAdmin, hasRole } = useAuth();
-  const [sprints, setSprints] = useState<any[]>([]);
+  const [sprints, setSprints] = useState<SprintListRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<any | null>(null);
+  const [editing, setEditing] = useState<SprintListRow | null>(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -65,7 +71,7 @@ export default function Sprints() {
       .from("sprints")
       .select("*, tasks:tasks(id, status)")
       .order("created_at", { ascending: false });
-    setSprints(data ?? []);
+    setSprints((data ?? []) as SprintListRow[]);
     setLoading(false);
   };
 
@@ -82,13 +88,13 @@ export default function Sprints() {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    const payload: any = {
+    const payload: TablesUpdate<"sprints"> = {
       name: String(f.get("name") || "").trim(),
       objective: String(f.get("objective") || "") || null,
       description: String(f.get("description") || "") || null,
-      start_date: f.get("start_date") || null,
-      end_date: f.get("end_date") || null,
-      status: f.get("status") || "planned",
+      start_date: String(f.get("start_date") || "").trim() || null,
+      end_date: String(f.get("end_date") || "").trim() || null,
+      status: String(f.get("status") || "planned"),
     };
     if (!payload.name) return toast.error("Informe o nome");
     if (editing) {
@@ -96,8 +102,12 @@ export default function Sprints() {
       if (error) return toast.error(error.message);
       toast.success("Sprint atualizada");
     } else {
-      payload.created_by = user?.id;
-      const { error } = await supabase.from("sprints").insert(payload);
+      const insertPayload: TablesInsert<"sprints"> = {
+        ...payload,
+        name: payload.name ?? "",
+        created_by: user?.id ?? null,
+      };
+      const { error } = await supabase.from("sprints").insert(insertPayload);
       if (error) return toast.error(error.message);
       toast.success("Sprint criada");
     }
@@ -170,7 +180,7 @@ export default function Sprints() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {orderedSprints.map((s) => {
             const total = s.tasks?.length ?? 0;
-            const done = s.tasks?.filter((t: any) => t.status === "done" || t.status === "became_process").length ?? 0;
+            const done = s.tasks?.filter((t) => t.status === "done" || t.status === "became_process").length ?? 0;
             const progress = total ? Math.round((done / total) * 100) : 0;
             const isActive = s.status === "active";
 

@@ -37,8 +37,13 @@ import { isBefore, startOfDay, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
+import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 
 const COLUMNS = TASK_STATUSES.filter((s) => s.value !== "archived");
+
+type SprintOption = Pick<Tables<"sprints">, "id" | "name">;
+type ProfileOption = Pick<Tables<"profiles">, "id" | "full_name">;
+type ChecklistRow = Tables<"task_checklist_items">;
 
 interface Task {
   id: string;
@@ -232,12 +237,12 @@ export default function Tasks() {
   const { user, isAdmin, hasRole } = useAuth();
   const [search] = useSearchParams();
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [sprints, setSprints] = useState<any[]>([]);
-  const [profiles, setProfiles] = useState<any[]>([]);
+  const [sprints, setSprints] = useState<SprintOption[]>([]);
+  const [profiles, setProfiles] = useState<ProfileOption[]>([]);
   const [editing, setEditing] = useState<Task | null>(null);
   const [open, setOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [checklist, setChecklist] = useState<any[]>([]);
+  const [checklist, setChecklist] = useState<ChecklistRow[]>([]);
   const [newCheckItem, setNewCheckItem] = useState("");
   const [filterSector, setFilterSector] = useState<string>("all");
   const [filterAssignee, setFilterAssignee] = useState<string>("all");
@@ -280,7 +285,7 @@ export default function Tasks() {
 
   useEffect(() => {
     if (editorSupportAssigneeOnly && user) setFilterAssignee(user.id);
-  }, [editorSupportAssigneeOnly, user?.id]);
+  }, [editorSupportAssigneeOnly, user]);
 
   const load = async () => {
     const [{ data: t }, { data: s }, { data: p }] = await Promise.all([
@@ -403,15 +408,15 @@ export default function Tasks() {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    const payload: any = {
+    const payload: TablesUpdate<"tasks"> = {
       title: String(f.get("title") || "").trim(),
       description: String(f.get("description") || "") || null,
-      sector: f.get("sector") || null,
-      priority: f.get("priority") || "medium",
-      status: f.get("status") || "backlog",
+      sector: (f.get("sector") as string) || null,
+      priority: String(f.get("priority") || "medium"),
+      status: String(f.get("status") || "backlog"),
       sprint_id: (f.get("sprint_id") as string) || null,
       assignee_id: (f.get("assignee_id") as string) || null,
-      due_date: f.get("due_date") || null,
+      due_date: String(f.get("due_date") || "").trim() || null,
     };
     if (payload.sector === "none") payload.sector = null;
     if (payload.sprint_id === "none") payload.sprint_id = null;
@@ -423,8 +428,12 @@ export default function Tasks() {
       if (error) return toast.error(error.message);
       toast.success("Tarefa atualizada");
     } else {
-      payload.created_by = user?.id;
-      const { error } = await supabase.from("tasks").insert(payload);
+      const insertPayload: TablesInsert<"tasks"> = {
+        ...payload,
+        title: payload.title ?? "",
+        created_by: user?.id ?? null,
+      };
+      const { error } = await supabase.from("tasks").insert(insertPayload);
       if (error) return toast.error(error.message);
       toast.success("Tarefa criada");
     }
@@ -444,7 +453,7 @@ export default function Tasks() {
       .select()
       .single();
     if (error) return toast.error(error.message);
-    setChecklist([...checklist, data]);
+    setChecklist([...checklist, data as ChecklistRow]);
     setNewCheckItem("");
     setTasks((prev) =>
       prev.map((t) =>
@@ -454,7 +463,7 @@ export default function Tasks() {
       ),
     );
   };
-  const toggleCheck = async (i: any) => {
+  const toggleCheck = async (i: ChecklistRow) => {
     const { error } = await supabase.from("task_checklist_items").update({ is_done: !i.is_done }).eq("id", i.id);
     if (error) return toast.error(error.message);
     setChecklist(checklist.map((x) => (x.id === i.id ? { ...x, is_done: !x.is_done } : x)));

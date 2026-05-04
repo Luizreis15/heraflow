@@ -24,11 +24,20 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
+import type { LucideIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import type { AppRole } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const items = [
+type NavItem = {
+  title: string;
+  url: string;
+  icon: LucideIcon;
+  roles: AppRole[] | null;
+};
+
+const items: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, roles: null },
   { title: "Sprints", url: "/sprints", icon: Calendar, roles: null },
   { title: "Tarefas", url: "/tasks", icon: KanbanSquare, roles: null },
@@ -37,7 +46,7 @@ const items = [
   { title: "Diário de Bordo", url: "/diary", icon: BookOpen, roles: null },
   { title: "Biblioteca", url: "/assets", icon: Library, roles: null },
   { title: "Configurações", url: "/settings", icon: Settings, roles: ["admin"] },
-] as const;
+];
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -45,7 +54,7 @@ export function AppSidebar() {
   const { pathname } = useLocation();
   const { profile, hasRole, signOut } = useAuth();
 
-  const visible = items.filter((i) => !i.roles || hasRole(i.roles as any));
+  const visible = items.filter((i) => !i.roles || hasRole(i.roles));
 
   return (
     <Sidebar collapsible="icon">

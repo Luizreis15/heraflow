@@ -36,6 +36,10 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
+import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+
+type LeadRow = Tables<"leads">;
+type ProfileOption = Pick<Tables<"profiles">, "id" | "full_name">;
 
 /** Destaque visual por etapa do funil (borda superior + tom do cabeçalho) */
 const STAGE_ACCENT: Record<string, string> = {
@@ -51,7 +55,7 @@ const STAGE_ACCENT: Record<string, string> = {
   nurturing: "from-indigo-500/45 via-indigo-400/12 to-transparent",
 };
 
-function LeadCard({ lead, onClick }: { lead: any; onClick: () => void }) {
+function LeadCard({ lead, onClick }: { lead: LeadRow; onClick: () => void }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id });
   const followUp = lead.next_follow_up_date
     ? format(new Date(lead.next_follow_up_date), "dd MMM yyyy", { locale: ptBR })
@@ -115,8 +119,8 @@ function Column({
 }: {
   status: string;
   label: string;
-  leads: any[];
-  onCardClick: (l: any) => void;
+  leads: LeadRow[];
+  onCardClick: (l: LeadRow) => void;
   onNewInStage: (stage: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
@@ -158,7 +162,7 @@ function Column({
               </Button>
             </div>
           ) : (
-            leads.map((l: any) => <LeadCard key={l.id} lead={l} onClick={() => onCardClick(l)} />)
+            leads.map((l) => <LeadCard key={l.id} lead={l} onClick={() => onCardClick(l)} />)
           )}
         </div>
       </div>
@@ -169,9 +173,9 @@ function Column({
 export default function Commercial() {
   const { user, isAdmin } = useAuth();
   const [search] = useSearchParams();
-  const [leads, setLeads] = useState<any[]>([]);
-  const [profiles, setProfiles] = useState<any[]>([]);
-  const [editing, setEditing] = useState<any | null>(null);
+  const [leads, setLeads] = useState<LeadRow[]>([]);
+  const [profiles, setProfiles] = useState<ProfileOption[]>([]);
+  const [editing, setEditing] = useState<LeadRow | null>(null);
   const [open, setOpen] = useState(false);
   const [leadStatus, setLeadStatus] = useState("mapped");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -191,7 +195,7 @@ export default function Commercial() {
 
   useEffect(() => {
     if (open && editing) setLeadStatus(editing.status);
-  }, [open, editing?.id, editing?.status]);
+  }, [open, editing]);
 
   const load = async () => {
     const [{ data: l }, { data: p }] = await Promise.all([
@@ -203,7 +207,7 @@ export default function Commercial() {
   };
 
   const grouped = useMemo(() => {
-    const g: Record<string, any[]> = {};
+    const g: Record<string, LeadRow[]> = {};
     LEAD_STATUSES.forEach((s) => (g[s.value] = []));
     leads.forEach((l) => {
       if (g[l.status]) g[l.status].push(l);
@@ -249,7 +253,7 @@ export default function Commercial() {
     }
   };
 
-  const openLeadModal = (l: any) => {
+  const openLeadModal = (l: LeadRow) => {
     setEditing(l);
     setOpen(true);
   };
@@ -267,7 +271,7 @@ export default function Commercial() {
     const followUp = String(f.get("next_follow_up_date") || "").trim();
     const lostReason = String(f.get("lost_reason") || "").trim();
 
-    const payload: any = {
+    const payload: TablesUpdate<"leads"> = {
       clinic_name: String(f.get("clinic_name") || "").trim(),
       contact_name: String(f.get("contact_name") || "") || null,
       city: String(f.get("city") || "") || null,
@@ -311,8 +315,12 @@ export default function Commercial() {
       if (error) return toast.error(error.message);
       toast.success("Lead atualizado");
     } else {
-      payload.created_by = user?.id;
-      const { error } = await supabase.from("leads").insert(payload);
+      const insertPayload: TablesInsert<"leads"> = {
+        ...payload,
+        clinic_name: payload.clinic_name ?? "",
+        created_by: user?.id ?? null,
+      };
+      const { error } = await supabase.from("leads").insert(insertPayload);
       if (error) return toast.error(error.message);
       toast.success("Lead criado");
     }

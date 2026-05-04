@@ -28,6 +28,21 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+
+type DiaryEmbedSprint = Pick<Tables<"sprints">, "id" | "name" | "status">;
+type DiaryEmbedTask = Pick<Tables<"tasks">, "id" | "title" | "status">;
+type DiaryEmbedLead = Pick<Tables<"leads">, "id" | "clinic_name" | "status">;
+
+type DiaryEntryListRow = Tables<"diary_entries"> & {
+  sprints?: DiaryEmbedSprint | DiaryEmbedSprint[] | null;
+  tasks?: DiaryEmbedTask | DiaryEmbedTask[] | null;
+  leads?: DiaryEmbedLead | DiaryEmbedLead[] | null;
+};
+
+type SprintOption = Pick<Tables<"sprints">, "id" | "name" | "status">;
+type TaskOption = Pick<Tables<"tasks">, "id" | "title" | "status">;
+type LeadOption = Pick<Tables<"leads">, "id" | "clinic_name" | "status">;
 
 const DIARY_LIST_SELECT = `
   *,
@@ -99,28 +114,28 @@ const DEFAULT_CAT_VISUAL = {
   labelTone: "text-slate-500",
 };
 
-function linkSprint(d: any) {
+function linkSprint(d: DiaryEntryListRow): DiaryEmbedSprint | null {
   const row = d?.sprints;
-  return row && typeof row === "object" && !Array.isArray(row) ? row : Array.isArray(row) ? row[0] : null;
+  return row && typeof row === "object" && !Array.isArray(row) ? row : Array.isArray(row) ? row[0] ?? null : null;
 }
-function linkTask(d: any) {
+function linkTask(d: DiaryEntryListRow): DiaryEmbedTask | null {
   const row = d?.tasks;
-  return row && typeof row === "object" && !Array.isArray(row) ? row : Array.isArray(row) ? row[0] : null;
+  return row && typeof row === "object" && !Array.isArray(row) ? row : Array.isArray(row) ? row[0] ?? null : null;
 }
-function linkLead(d: any) {
+function linkLead(d: DiaryEntryListRow): DiaryEmbedLead | null {
   const row = d?.leads;
-  return row && typeof row === "object" && !Array.isArray(row) ? row : Array.isArray(row) ? row[0] : null;
+  return row && typeof row === "object" && !Array.isArray(row) ? row : Array.isArray(row) ? row[0] ?? null : null;
 }
 
 export default function Diary() {
   const { user, isAdmin } = useAuth();
   const [search] = useSearchParams();
-  const [items, setItems] = useState<any[]>([]);
-  const [sprints, setSprints] = useState<any[]>([]);
-  const [tasks, setTasks] = useState<any[]>([]);
-  const [leads, setLeads] = useState<any[]>([]);
+  const [items, setItems] = useState<DiaryEntryListRow[]>([]);
+  const [sprints, setSprints] = useState<SprintOption[]>([]);
+  const [tasks, setTasks] = useState<TaskOption[]>([]);
+  const [leads, setLeads] = useState<LeadOption[]>([]);
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<any | null>(null);
+  const [editing, setEditing] = useState<DiaryEntryListRow | null>(null);
   const [filterCategory, setFilterCategory] = useState("all");
 
   const [formCategory, setFormCategory] = useState("none");
@@ -158,7 +173,7 @@ export default function Diary() {
       supabase.from("tasks").select("id, title, status").order("created_at", { ascending: false }).limit(500),
       supabase.from("leads").select("id, clinic_name, status").order("created_at", { ascending: false }).limit(500),
     ]);
-    setItems(d ?? []);
+    setItems((d ?? []) as DiaryEntryListRow[]);
     setSprints(s ?? []);
     setTasks(t ?? []);
     setLeads(l ?? []);
@@ -172,7 +187,7 @@ export default function Diary() {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    const payload: any = {
+    const payload: TablesUpdate<"diary_entries"> = {
       title: String(f.get("title") || "").trim(),
       category: formCategory === "none" ? null : formCategory,
       content: String(f.get("content") || "").trim(),
@@ -190,8 +205,13 @@ export default function Diary() {
       const { error } = await supabase.from("diary_entries").update(payload).eq("id", editing.id);
       if (error) return toast.error(error.message);
     } else {
-      payload.created_by = user?.id;
-      const { error } = await supabase.from("diary_entries").insert(payload);
+      const insertPayload: TablesInsert<"diary_entries"> = {
+        ...payload,
+        title: payload.title ?? "",
+        content: payload.content ?? "",
+        created_by: user?.id ?? null,
+      };
+      const { error } = await supabase.from("diary_entries").insert(insertPayload);
       if (error) return toast.error(error.message);
     }
     toast.success("Salvo");
