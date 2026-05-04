@@ -15,6 +15,7 @@ import Commercial from "./pages/Commercial";
 import Diary from "./pages/Diary";
 import Assets from "./pages/Assets";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/processes" element={<Processes />} />
               <Route path="/diary" element={<Diary />} />
               <Route path="/assets" element={<Assets />} />
+              <Route path="/profile" element={<Profile />} />
               <Route
                 path="/commercial"
                 element={

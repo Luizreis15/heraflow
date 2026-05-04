@@ -10,6 +10,7 @@ import {
   Settings,
   LogOut,
   Hexagon,
+  User,
 } from "lucide-react";
 import {
   Sidebar,
@@ -131,11 +132,38 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border/50 p-3">
-        {!collapsed && profile && (
-          <div className="mb-2 rounded-lg border border-sidebar-border/60 bg-sidebar-accent/30 px-3 py-2.5 backdrop-blur-sm">
-            <div className="truncate text-xs font-semibold text-sidebar-foreground">{profile.full_name}</div>
-            <div className="truncate text-[11px] text-sidebar-foreground/55">{profile.email}</div>
-          </div>
+        {profile && (
+          <>
+            {!collapsed ? (
+              <div className="mb-3 rounded-xl border border-white/[0.08] bg-gradient-to-br from-sidebar-accent/50 to-black/20 p-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] backdrop-blur-md">
+                <div className="truncate text-xs font-semibold text-sidebar-foreground">{profile.full_name}</div>
+                <div className="mt-0.5 truncate text-[11px] text-sidebar-foreground/55">{profile.email}</div>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 w-full border-primary/25 bg-primary/5 text-xs font-medium text-sidebar-foreground hover:bg-primary/10 hover:text-white"
+                >
+                  <NavLink to="/profile" className="flex items-center justify-center gap-2">
+                    <User className="h-3.5 w-3.5" />
+                    Meu perfil
+                  </NavLink>
+                </Button>
+              </div>
+            ) : (
+              <Button
+                asChild
+                variant="ghost"
+                size="icon"
+                className="mb-2 w-full text-sidebar-foreground/80 hover:bg-sidebar-accent/80 hover:text-primary"
+                title="Meu perfil"
+              >
+                <NavLink to="/profile">
+                  <User className="h-4 w-4" />
+                </NavLink>
+              </Button>
+            )}
+          </>
         )}
         <Button
           variant="ghost"
