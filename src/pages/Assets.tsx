@@ -62,16 +62,16 @@ export default function Assets() {
   };
 
   return (
-    <div className="space-y-4 max-w-7xl">
+    <div className="max-w-7xl space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Biblioteca</h1>
-          <p className="text-muted-foreground text-sm">Materiais e links reutilizáveis.</p>
+          <p className="text-sm text-slate-400">Materiais e links reutilizáveis.</p>
         </div>
         <Button onClick={() => { setEditing(null); setOpen(true); }}><Plus className="h-4 w-4 mr-1" /> Novo ativo</Button>
       </div>
 
-      <Card className="p-3">
+      <Card className="border-border/70 p-4">
         <Select value={filterCat} onValueChange={setFilterCat}>
           <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -82,13 +82,13 @@ export default function Assets() {
       </Card>
 
       {filtered.length === 0 ? (
-        <Card className="p-12 text-center text-muted-foreground">Nenhum ativo cadastrado.</Card>
+        <Card className="border-dashed border-border/60 bg-muted/10 p-12 text-center text-slate-400">Nenhum ativo cadastrado.</Card>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((a) => (
             <Card key={a.id} className="p-4 transition-all duration-200 hover:border-primary/25 hover:shadow-lg">
               <div className="flex justify-between items-start gap-2 mb-2">
-                <h3 className="font-medium leading-snug">{a.name}</h3>
+                <h3 className="text-base font-semibold leading-snug tracking-tight">{a.name}</h3>
                 <Badge variant="secondary">{labelOf(ASSET_STATUSES, a.status)}</Badge>
               </div>
               <div className="text-xs text-muted-foreground mb-2">{labelOf(ASSET_CATEGORIES, a.category)}{a.version ? ` · v${a.version}` : ""}</div>

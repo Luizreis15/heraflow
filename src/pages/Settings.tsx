@@ -56,15 +56,15 @@ export default function Settings() {
   };
 
   return (
-    <div className="space-y-4 max-w-5xl">
+    <div className="max-w-5xl space-y-6">
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Configurações</h1>
-        <p className="text-muted-foreground text-sm">Gestão de usuários e permissões.</p>
+        <p className="text-sm text-slate-400">Gestão de usuários e permissões.</p>
       </div>
 
-      <Card>
+      <Card className="overflow-hidden">
         {loading ? (
-          <div className="p-6 text-muted-foreground">Carregando...</div>
+          <div className="p-6 text-slate-400">Carregando...</div>
         ) : (
           <Table>
             <TableHeader>
@@ -80,9 +80,9 @@ export default function Settings() {
                 <TableRow key={u.id}>
                   <TableCell className="font-medium">{u.full_name}</TableCell>
                   <TableCell className="text-muted-foreground">{u.email}</TableCell>
-                  <TableCell>
+                  <TableCell className="align-middle">
                     <Select value={u.roles[0] ?? "viewer"} onValueChange={(v) => setRole(u.id, v as AppRole)}>
-                      <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="h-10 w-44"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {ROLES.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}
                       </SelectContent>

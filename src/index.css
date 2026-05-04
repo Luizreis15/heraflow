@@ -22,19 +22,20 @@
     --secondary-foreground: 213 32% 90%;
 
     --muted: 222 40% 12%;
-    --muted-foreground: 213 12% 60%;
+    --muted-foreground: 213 14% 66%;
 
     --accent: 188 94% 51%;
     --accent-foreground: 204 73% 6%;
 
-    --brown: 213 18% 72%;
+    /* Cool neutral (evita tom “boutique”; compatível com utilitários text-brown no Tailwind) */
+    --brown: 215 16% 58%;
     --brown-foreground: 210 35% 97%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 18% 22%;
-    --input: 215 18% 26%;
+    --border: 215 16% 28%;
+    --input: 215 16% 32%;
     --ring: 199 89% 48%;
 
     --radius: 0.875rem;

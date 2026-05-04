@@ -106,16 +106,16 @@ export default function Diary() {
   };
 
   return (
-    <div className="space-y-4 max-w-5xl">
+    <div className="max-w-5xl space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Diário de Bordo</h1>
-          <p className="text-muted-foreground text-sm">Aprendizados, decisões, erros e vitórias.</p>
+          <p className="text-sm text-slate-400">Aprendizados, decisões, erros e vitórias.</p>
         </div>
         <Button onClick={() => { setEditing(null); setOpen(true); }}><Plus className="h-4 w-4 mr-1" /> Novo registro</Button>
       </div>
 
-      <Card className="p-3">
+      <Card className="border-border/70 p-4">
         <Select value={filterCategory} onValueChange={setFilterCategory}>
           <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -126,7 +126,7 @@ export default function Diary() {
       </Card>
 
       {filtered.length === 0 ? (
-        <Card className="p-12 text-center text-muted-foreground">Nenhum registro ainda.</Card>
+        <Card className="border-dashed border-border/60 bg-muted/10 p-12 text-center text-slate-400">Nenhum registro ainda.</Card>
       ) : (
         <div className="space-y-3">
           {filtered.map((d) => {
@@ -185,8 +185,8 @@ export default function Diary() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="rounded-lg border border-border bg-muted/20 p-3 space-y-3">
-              <p className="text-xs font-medium text-foreground">Vínculos (opcional)</p>
+            <div className="space-y-3 rounded-xl border border-white/[0.08] bg-black/25 p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Vínculos (opcional)</p>
               <div className="grid gap-3 sm:grid-cols-1">
                 <div>
                   <Label className="text-xs">Sprint vinculada</Label>

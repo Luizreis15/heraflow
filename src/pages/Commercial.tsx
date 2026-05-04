@@ -40,9 +40,12 @@ function LeadCard({ lead, onClick }: { lead: any; onClick: () => void }) {
 function Column({ status, label, leads, onCardClick }: any) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
   return (
-    <div ref={setNodeRef} className={`flex-shrink-0 w-72 bg-muted/40 rounded-lg p-3 ${isOver ? "ring-2 ring-accent" : ""}`}>
-      <div className="flex justify-between mb-3">
-        <h3 className="text-sm font-semibold">{label}</h3>
+    <div
+      ref={setNodeRef}
+      className={`w-72 flex-shrink-0 rounded-xl border border-border/50 bg-card/40 p-3 shadow-inner transition-shadow ${isOver ? "ring-2 ring-primary/50 ring-offset-2 ring-offset-background" : ""}`}
+    >
+      <div className="mb-3 flex justify-between">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">{label}</h3>
         <span className="text-xs text-muted-foreground">{leads.length}</span>
       </div>
       <div className="min-h-[100px]">
@@ -181,11 +184,11 @@ export default function Commercial() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Comercial</h1>
-          <p className="text-muted-foreground text-sm">Pipeline de leads.</p>
+          <p className="text-sm text-slate-400">Pipeline de leads.</p>
         </div>
         <Button onClick={() => { setEditing(null); setOpen(true); }}><Plus className="h-4 w-4 mr-1" /> Novo lead</Button>
       </div>

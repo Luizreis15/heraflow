@@ -100,18 +100,18 @@ export default function Processes() {
   };
 
   return (
-    <div className="space-y-4 max-w-7xl">
+    <div className="max-w-7xl space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Processos</h1>
-          <p className="text-muted-foreground text-sm">Documentação operacional viva.</p>
+          <p className="text-sm text-slate-400">Documentação operacional viva.</p>
         </div>
         <Button onClick={() => { setEditing(null); setOpen(true); }}>
           <Plus className="h-4 w-4 mr-1" /> Novo processo
         </Button>
       </div>
 
-      <Card className="p-3 flex flex-wrap gap-3">
+      <Card className="flex flex-wrap gap-3 border-border/70 p-4">
         <Input placeholder="Buscar..." value={q} onChange={(e) => setQ(e.target.value)} className="max-w-xs" />
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
@@ -129,9 +129,9 @@ export default function Processes() {
         </Select>
       </Card>
 
-      <Card>
+      <Card className="overflow-hidden">
         {filtered.length === 0 ? (
-          <div className="p-12 text-center text-muted-foreground">Nenhum processo encontrado.</div>
+          <div className="p-12 text-center text-slate-400">Nenhum processo encontrado.</div>
         ) : (
           <Table>
             <TableHeader>
