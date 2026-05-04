@@ -9,6 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "deploy": "npx vercel",
+    "deploy:prod": "npx vercel --prod",
     "test": "vitest run",
     "test:watch": "vitest"
   },

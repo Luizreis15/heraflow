@@ -1,0 +1,26 @@
+Templates de e-mail — HeraFlow / Supabase Auth
+==============================================
+
+1) Supabase Dashboard → Authentication → Email Templates
+2) Escolha o modelo (Confirm signup, Reset password, etc.)
+3) Cole o HTML do ficheiro correspondente no corpo da mensagem.
+4) Ajuste o Assunto (Subject) no mesmo ecrã, se quiser.
+
+Variáveis que o Supabase substitui (não altere o nome):
+  {{ .ConfirmationURL }}  — link principal (confirmação ou reset)
+  {{ .SiteURL }}           — URL base do projeto
+  {{ .Email }}             — e-mail do destinatário
+
+Redirect URLs (Authentication → URL Configuration)
+  Adicione as URLs do cockpit, por exemplo:
+  https://SEU_DOMINIO/welcome
+  https://SEU_DOMINIO/reset-password
+  https://SEU_DOMINIO/login
+
+Envio via Resend: configure SMTP em Authentication → Emails → SMTP Settings
+(documentação Resend + Supabase).
+
+Ficheiros:
+  confirm-signup.html   — confirmação de novo utilizador
+  reset-password.html   — recuperação de senha
+  magic-link.html       — magic link (se activar)
